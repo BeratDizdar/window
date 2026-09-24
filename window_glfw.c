@@ -25,19 +25,8 @@ typedef struct Window {
 IWindow Window_Create(const char *title, int width, int height) {
     glfwInit();
     
-#if defined(__APPLE__)
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-#else
-    // Windows / Linux OpenGL ayarları
-    glfwWindowHint(GLFW_DEPTH_BITS, 0);
-    glfwWindowHint(GLFW_STENCIL_BITS, 0);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef _DEBUG
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-#endif
-#endif
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     IWindow w = malloc(sizeof(Window));
     w->window = glfwCreateWindow(width, height, title, NULL, NULL);
@@ -48,34 +37,21 @@ IWindow Window_Create(const char *title, int width, int height) {
         return NULL;
     }
 
-#if !defined(__APPLE__)
-    glfwMakeContextCurrent(w->window);
-
-    int version = gladLoaderLoadGL();
-    if (!version) {
-        fprintf(stderr, "[FATAL]: gladLoadGL\n");
-        glfwDestroyWindow(w->window);
-        glfwTerminate();
-        free(w);
-        return NULL;
-    }
-#endif
-
     return w;
-}
-
-void Window_SwapBuffers(IWindow w) {
-    glfwSwapBuffers(w->window);
 }
 
 void *Window_GetPtr(IWindow w) {
 #if defined(_WIN32)
-    return glfwGetWin32Window(w->window);
+    return (void*glfwGetWin32Window(w->window);
 #elif defined(__APPLE__)
-    return glfwGetCocoaView(w->window);
+    return (void*)glfwGetCocoaWindow(w->window);
 #else
     return NULL;
 #endif
+}
+
+int Window_CreateVulkanSurface(IWindow w, void *vk_instance, void *out_vk_surface) {
+    return glfwCreateWindowSurface((VkInstance)vk_instance, w->window, NULL, (VkSurfaceKHR*)out_vk_surface) == 0;
 }
 
 int Window_ShouldClose(IWindow w) {
