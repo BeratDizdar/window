@@ -13,8 +13,8 @@ typedef struct Window *IWindow;
 
 IWindow  Window_Create(const char *title, int width, int height);
 void     Window_Destroy(IWindow w);
+int      Window_CreateVulkanSurface(IWindow w, void *vk_instance, void *out_vk_surface);
 
-void     Window_SwapBuffers(IWindow w);
 int      Window_ShouldClose(IWindow w);
 void     Window_PollEvents(IWindow w);
 void     Window_SendDestroyMessage(IWindow w);
